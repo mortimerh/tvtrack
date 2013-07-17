@@ -1,0 +1,51 @@
+table_users
+	id
+	username
+	email
+	password
+	salt
+
+table_user_options (http://stackoverflow.com/questions/10204902/database-design-for-user-settings)
+	id
+	userId
+	optionName
+	optionValue
+
+table_user_shows
+	id
+	userId
+	showId
+	followStatus ?
+	lastInteraction ??
+
+table_show
+	id?
+	name
+	tvdbId
+	tvrageId
+	cacheExpires
+	
+
+table_show_meta (cache-table)
+	startDate
+	endDate
+	status
+	orginCountry
+	runtime
+	genres??? (needs relations)
+
+table_episode (cache-table)
+	id
+	showId
+	seasonId
+	name
+	description
+	seasonNo ??
+	episodeNo
+	airDate
+	aired
+
+table_season (cache-table)
+	id ??
+	showId
+
