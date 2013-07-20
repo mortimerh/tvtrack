@@ -13,7 +13,7 @@ class Database{
 		$this->conn->set_charset("utf8");
 	}
 
-	//----- Functions pertaining to transactions ----------------
+//----- Functions pertaining to transactions --------------------------
 	function startTransaction(){
 		$this->conn->autocommit(FALSE);
 	}
@@ -26,7 +26,7 @@ class Database{
 		$this->conn->autocommit(TRUE);
 	}
 
-	//----- Functions pertaining to `users` ---------------------
+//----- Functions pertaining to `users` -------------------------------
 	function addUser($username, $password, $email){
 		require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/config.inc");
 		$userSalt = hash("sha512", openssl_random_pseudo_bytes(128) . $username );
@@ -35,24 +35,24 @@ class Database{
 
 		$results = $this->preparedQuery("INSERT INTO `users` (`username`, `email`, `password`, `salt`, `role`) VALUES (?, ?, ?, ?, 1)",
 												 "ssss", array($username, $email, $hashedPassword, $userSalt));
-		return $results[0];
+		return $results;
 	}
 	function getUser($userId){
-		$query = "SELECT `username`, `email`, `role`, `password`, `salt FROM `users` WHERE `id` = ?";
+		$query = "SELECT `username`, `email`, `role`, `password`, `salt` FROM `users` WHERE `id` = ?";
 		$results = $this->preparedQuery( $query, "i", array($userId) );
-		return $results[0];
+		return $results;
 	}
 	function deleteUser($userId){
 		$query = "DELETE FROM `users` WHERE `id` = ?";
 		$results = $this->preparedQuery( $query, "i", array($userId) );
-		return $results[0];
+		return $results;
 	}
 
-	//---- Functions pertaining to `users` && `shows` -----------
+//---- Functions pertaining to `users` && `shows` ---------------------
 	function addUserFollowedShow($userId, $showId){
 		$query = "INSERT INTO `user_has_shows` (`users_id`, `shows_id`) VALUES (?, ?)";
 		$results = $this->preparedQuery( $query, "ii", array($userId, $showId,) );
-		return $results[0];
+		return $results;
 	}
 	function getUserFollowedShows($userId){
 		$query = "SELECT `shows`.* FROM `user_has_shows` ";
@@ -62,16 +62,45 @@ class Database{
 		return $results;
 	}
 	function removeUserFolllowedShow($userId, $showId){
+		// TODO remove watched episodes for the unfollowed show
 		$query = "DELETE FROM `user_has_shows` WHERE `users_id` = ? AND `shows_id` = ?";
 		$results = $this->preparedQuery( $query, "ii", array($userId, $showId) );
-		return $results[0];
+		return $results;
+	}
+
+//---- Functions pertaining to `users` && `episodes` -----------------
+	
+	/* Takes (int) $userId and (int) episodeId or (int) userId and (array) $episodeId */
+	function addUserWatchedEpisodes($userId, $episodeId){
+		if ( is_array($episodeId) ) {
+			$userId = array_pad( array($userId), count($episodeId), $userId );
+		}
+		$query = "INSERT INTO `user_has_episodes` (`users_id`, `episodes_id`) VALUES (?, ?)";
+		$results = $this->preparedQuery( $query, "ii", array($userId, $episodeId) );
+		return $results;
 	}
 	
-	//---- Functions pertaining to `shows`-----------------------
+	function getUserWatchedEpisodes($userId){
+		$query = "SELECT `episodes`.*, `seasons`.* FROM `user_has_episodes` ";
+		$query.= "LEFT JOIN `episodes` ON `user_has_episodes`.`episodes_id` = `episodes`.`id` ";
+		$query.= "LEFT JOIN `seasons` ON `episodes`.`seasons_id` = `seasons`.`id`	";
+		$query.= "WHERE `user_has_episodes`.`users_id` = ?";
+		$results = $this->preparedQuery( $query, "i", array($userId) );
+		return $results;
+	}
+	function removeUserWatchedEpisodes($userId, $episodeId){
+		$query = "DELETE FROM `user_has_episodes` WHERE `users_id` = ? AND `episodes_id` = ?";
+		$results = $this->preparedQuery( $query, "ii", array($userId, $episodeId) );
+		return $results;
+	}
+	
+//---- Functions pertaining to `users` && `shows` && `episodes` -------
+	
+//---- Functions pertaining to `shows`---------------------------------
 	function addShow($name, $tvdbId, $tvrageId){
 		$query = "INSERT INTO `shows` (`name`, `tvdbId`, `tvrageId`) VALUES (?, ?, ?)";
 		$results = $this->preparedQuery( $query, "sii", array($name, $tvdbId, $tvrageId) );
-		return $results[0];
+		return $results;
 	}
 	function getShow($showId){
 		$query = "SELECT * FROM `shows` WHERE `id` = ?";
@@ -82,25 +111,25 @@ class Database{
 		if( $this->getShow($showId) ) {
 			$query = "UPDATE `shows` SET `name` = ?, `tvdbId` = ?, `tvrageId` = ? WHERE `id` = ?";
 			$results = $this->preparedQuery( $query, "siii", array($name, $tvdbId, $tvrageId, $showId) );
-			return $results[0];
+			return $results;
 		}
 		return false;
 	}
 	function deleteShow(){
 		$query = "DELETE FROM `shows` WHERE `id` = ?";
 		$results = $this->preparedQuery( $query, "i", array($userId) );
-		return $results[0];
+		return $results;
 	}
 
-	//----- Helper function for prepared statements -------------
+//----- Helper function for prepared statements -----------------------
 	private function preparedQuery($sql, $typeDef = FALSE, $params = FALSE){ 
 	  if( $stmt = $this->conn->prepare($sql) ){ 
 	    if(count($params) == count($params,1)){ 
 	      $params = array($params); 
 	      $multiQuery = FALSE; 
-	    } else { 
-	      $multiQuery = TRUE; 
-	    }  
+	    } else {
+	    	$multiQuery = TRUE;
+	    }
 	    
 	    if($typeDef){ 
 	      $bindParams = array();    
@@ -148,14 +177,17 @@ class Database{
 	      $result[$queryKey] = $queryResult; 
 	    } 
 	    mysqli_stmt_close($stmt);   
+	    if($multiQuery){ 
+	      return $result; 
+	    } else { 
+	    	if (count($result[0]) == 1) {
+	    		return $result[0][0];
+	    	}
+	      return $result[0]; 
+	    } 
+
 	  } else { 
-	    $result = FALSE; 
-	  } 
-	  
-	  if($multiQuery){ 
-	    return $result; 
-	  } else { 
-	    return $result[0]; 
+	    return FALSE; 
 	  } 
 	} 
 }
