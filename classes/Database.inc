@@ -13,7 +13,7 @@ class Database{
 		$this->conn->set_charset("utf8");
 	}
 
-	//----- Functions pertaining to transactions ---------------
+	//----- Functions pertaining to transactions ----------------
 	function startTransaction(){
 		$this->conn->autocommit(FALSE);
 	}
@@ -26,14 +26,14 @@ class Database{
 		$this->conn->autocommit(TRUE);
 	}
 
-	//----- Functions pertaining to `users` --------------------
-	function createUser($username, $password, $email){
+	//----- Functions pertaining to `users` ---------------------
+	function addUser($username, $password, $email){
 		require_once($_SERVER["DOCUMENT_ROOT"] . "/../config/config.inc");
 		$userSalt = hash("sha512", openssl_random_pseudo_bytes(128) . $username );
 		$siteSalt = $config["site"]["salt"];
 		$hashedPassword = hash( "sha512", $userSalt . $password . $siteSalt );
 
-		$results = $this->preparedQuery("INSERT INTO `users` (username, email, password, salt, role) VALUES (?, ?, ?, ?, 1)",
+		$results = $this->preparedQuery("INSERT INTO `users` (`username`, `email`, `password`, `salt`, `role`) VALUES (?, ?, ?, ?, 1)",
 												 "ssss", array($username, $email, $hashedPassword, $userSalt));
 		return $results[0];
 	}
@@ -48,7 +48,49 @@ class Database{
 		return $results[0];
 	}
 
-
+	//---- Functions pertaining to `users` && `shows` -----------
+	function addUserFollowedShow($userId, $showId){
+		$query = "INSERT INTO `user_has_shows` (`users_id`, `shows_id`) VALUES (?, ?)";
+		$results = $this->preparedQuery( $query, "ii", array($userId, $showId,) );
+		return $results[0];
+	}
+	function getUserFollowedShows($userId){
+		$query = "SELECT `shows`.* FROM `user_has_shows` ";
+		$query.= "LEFT JOIN `shows` ON `user_has_shows`.`shows_id` = `shows`.`id` ";
+		$query.= " WHERE `users_id` = ?";
+		$results = $this->preparedQuery( $query, "i", array($userId) );
+		return $results;
+	}
+	function removeUserFolllowedShow($userId, $showId){
+		$query = "DELETE FROM `user_has_shows` WHERE `users_id` = ? AND `shows_id` = ?";
+		$results = $this->preparedQuery( $query, "ii", array($userId, $showId) );
+		return $results[0];
+	}
+	
+	//---- Functions pertaining to `shows`-----------------------
+	function addShow($name, $tvdbId, $tvrageId){
+		$query = "INSERT INTO `shows` (`name`, `tvdbId`, `tvrageId`) VALUES (?, ?, ?)";
+		$results = $this->preparedQuery( $query, "sii", array($name, $tvdbId, $tvrageId) );
+		return $results[0];
+	}
+	function getShow($showId){
+		$query = "SELECT * FROM `shows` WHERE `id` = ?";
+		$results = $this->preparedQuery( $query, "i", array($showId) );
+		return $results;
+	}
+	function updateShow($showId, $name, $tvdbId, $tvrageId){
+		if( $this->getShow($showId) ) {
+			$query = "UPDATE `shows` SET `name` = ?, `tvdbId` = ?, `tvrageId` = ? WHERE `id` = ?";
+			$results = $this->preparedQuery( $query, "siii", array($name, $tvdbId, $tvrageId, $showId) );
+			return $results[0];
+		}
+		return false;
+	}
+	function deleteShow(){
+		$query = "DELETE FROM `shows` WHERE `id` = ?";
+		$results = $this->preparedQuery( $query, "i", array($userId) );
+		return $results[0];
+	}
 
 	//----- Helper function for prepared statements -------------
 	private function preparedQuery($sql, $typeDef = FALSE, $params = FALSE){ 
