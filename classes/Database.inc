@@ -61,10 +61,15 @@ class Database{
 		$results = $this->preparedQuery( $query, "i", array($userId) );
 		return $results;
 	}
+	/* Deletes row from user_has_shows and rows from user_has_episodes where episodeId belongs to showId */
 	function removeUserFolllowedShow($userId, $showId){
-		// TODO remove watched episodes for the unfollowed show
-		$query = "DELETE FROM `user_has_shows` WHERE `users_id` = ? AND `shows_id` = ?";
-		$results = $this->preparedQuery( $query, "ii", array($userId, $showId) );
+		$query = "DELETE `user_has_shows`, `user_has_episodes` FROM `user_has_shows`";
+		$query.= "LEFT JOIN `shows` ON `shows`.`id` = `user_has_shows`.`shows_id`";
+		$query.= "LEFT JOIN `seasons` ON `seasons`.`shows_id` = `shows`.`id`";
+		$query.= "LEFT JOIN `episodes` ON `episodes`.`seasons_id` = `seasons`.`id`";
+		$query.= "LEFT JOIN `user_has_episodes` ON `user_has_episodes`.`episodes_id`= `episodes`.`id`";
+		$query.= "WHERE `user_has_shows`.`users_id` = 1 AND `user_has_shows`.`shows_id` = 8114";
+		$this->preparedQuery( $query, "ii", array($userId, $showId) );
 		return $results;
 	}
 
