@@ -68,7 +68,7 @@ class Database{
 		$query.= "LEFT JOIN `seasons` ON `seasons`.`shows_id` = `shows`.`id`";
 		$query.= "LEFT JOIN `episodes` ON `episodes`.`seasons_id` = `seasons`.`id`";
 		$query.= "LEFT JOIN `user_has_episodes` ON `user_has_episodes`.`episodes_id`= `episodes`.`id`";
-		$query.= "WHERE `user_has_shows`.`users_id` = 1 AND `user_has_shows`.`shows_id` = 8114";
+		$query.= "WHERE `user_has_shows`.`users_id` = ? AND `user_has_shows`.`shows_id` = ?";
 		$this->preparedQuery( $query, "ii", array($userId, $showId) );
 		return $results;
 	}
@@ -100,6 +100,34 @@ class Database{
 	}
 	
 //---- Functions pertaining to `users` && `shows` && `episodes` -------
+	function getUserShowLastWatchedEpisode($userId, $showId){
+		$query = "SELECT `episodes`.* FROM `user_has_episodes` ";
+		$query.= "LEFT JOIN `episodes` ON `episodes`.`id` = `user_has_episodes`.`episodes_id` ";
+		$query.= "LEFT JOIN `seasons` ON `episodes`.`seasons_id` = `seasons`.`id`	";
+		$query.= "WHERE `user_has_episodes`.`users_id` = ? AND `seasons`.`shows_id` = ? ";
+		$query.= "ORDER BY `episodes`.`airdate` DESC LIMIT 1";
+		$results = $this->preparedQuery( $query, "ii", array($userId, $showId) );
+		return $results;
+	}
+	function getUserShowNextEpisode($userId, $showId){
+		$lastWatchedEpisode = $this->getUserShowLastWatchedEpisode($userId, $showId);
+		$query = "SELECT `episodes`.*, `seasons`.`number` AS `seasonNo` FROM `episodes` ";
+		$query.= "LEFT JOIN `seasons` ON `seasons`.`id` = `episodes`.`seasons_id` ";
+		$query.= "WHERE `seasons`.`shows_id` = ? AND `episodes`.`airdate` > ? ";
+		$query.= "ORDER BY `episodes`.`airdate` ASC LIMIT 1";
+		$results = $this->preparedQuery( $query, "is", array($showId, $lastWatchedEpisode["airdate"]) );
+		return $results;
+	}
+	function getUserShowWatchedEpisodes($userId, $showId){
+		$query = "SELECT `shows`.*, `episodes`.* FROM `shows` ";
+		$query.= "LEFT JOIN `seasons` ON `seasons`.`shows_id` = `shows`.`id` ";
+		$query.= "LEFT JOIN `episodes` ON `episodes`.`seasons_id` = `seasons`.`id` ";
+		$query.= "LEFT JOIN `user_has_episodes` ON `user_has_episodes`.`episodes_id` = `episodes`.`id` ";
+		$query.= "WHERE `user_has_episodes`.`users_id` = ? AND `shows`.`id` = ?";
+		$results = $this->preparedQuery( $query, "ii", array($userId, $showId) );
+		return $results;
+	}
+
 	
 //---- Functions pertaining to `shows`---------------------------------
 	function addShow($name, $tvdbId, $tvrageId){
