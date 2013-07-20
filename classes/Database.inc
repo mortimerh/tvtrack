@@ -153,6 +153,28 @@ class Database{
 		$results = $this->preparedQuery( $query, "i", array($userId) );
 		return $results;
 	}
+	function getShowSeasons($showId){
+		$query = "SELECT `shows`.`name` as `showName`, `seasons`.* FROM `shows` ";
+		$query.= "LEFT JOIN `seasons` ON `seasons`.`shows_id` = `shows`.`id` ";
+		$query.= "WHERE `shows`.`id` = ?";
+		$results = $this->preparedQuery( $query, "i", array($showId) );
+		return $results;
+	}
+	function getShowEpisodes($showId){
+		$query = "SELECT `shows`.`name` as `showName`, `episodes`.* FROM `shows` ";
+		$query.= "LEFT JOIN `seasons` ON `seasons`.`shows_id` = `shows`.`id` ";
+		$query.= "LEFT JOIN `episodes` ON  `episodes`.`seasons_id` = `seasons`.`id` ";
+		$query.= "WHERE `shows`.`id` = ? ";
+		$results = $this->preparedQuery( $query, "i", array($showId) );
+		return $results;
+	}
+	function getShowFullInfo($showId){
+		$query = "SELECT `shows`.*, `shows_meta`.* FROM `shows` ";
+		$query.= "LEFT JOIN `shows_meta` ON `shows_meta`.`shows_id` = `shows`.`id` ";
+		$query.= "WHERE `shows`.`id` = ? ";
+		$results = $this->preparedQuery( $query, "i", array($showId) );
+		return $results;
+	}
 
 //---- Functions pertaining to `seasons`-------------------------------
 	function addSeason($showId, $number, $name, $tvrageId, $tvdbId){
@@ -161,9 +183,9 @@ class Database{
 		$results = $this->preparedQuery( $query, "iisii", array($showId, $number, $name, $tvrageId, $tvdbId));
 		return $results;
 	}
-	function getSeason($seasonsId){
+	function getSeason($seasonId){
 		$query = "SELECT `seasons`.* WHERE `id` = ? ";
-		$results = $this->preparedQuery( $query, "i", array($seasonsId) );
+		$results = $this->preparedQuery( $query, "i", array($seasonId) );
 		return $results;
 	}
 	function getSeasonByShowAndNumber($showId, $seaonsNo){
@@ -171,25 +193,33 @@ class Database{
 		$results = $this->preparedQuery( $query, "ii", array($showId, $seaonsNo) );
 		return $results;
 	}
-	function updateSeason($seasonsId, $showId, $number, $name, $tvrageId, $tvdbId){
-		if ( $this->getSeason($seasonsId) ){
+	function updateSeason($seasonId, $showId, $number, $name, $tvrageId, $tvdbId){
+		if ( $this->getSeason($seasonId) ){
 			$query = "UPDATE `seasons` SET `shows_id` = ?, `number` = ?, `name` = ?, `tvrageId` = ?, `tvdbId` = ? ";
 			$query.= "WHERE `id` = ? ";
-			$results = $this->preparedQuery( $query, "iisiii", array($showId, $number, $name, $tvrageId, $tvdbId, $seasonsId))
+			$results = $this->preparedQuery( $query, "iisiii", array($showId, $number, $name, $tvrageId, $tvdbId, $seasonId))
 		}
 		return false;
 	}
-	function deleteSeason($seasonsId){
-		$query = "DELETE FROm `seasons` WHERE `id` = ?";
-		$results = $this->preparedQuery( $query, "i", array($seasonsId) );
+	function deleteSeason($seasonId){
+		$query = "DELETE FROM `seasons` WHERE `id` = ?";
+		$results = $this->preparedQuery( $query, "i", array($seasonId) );
+		return $results;
+	}
+	function getSeasonEpisodes($seasonId){
+		$query = "SELECT `season`.`number` as `seasonNo`, `season`.`name` as `seasonName`, `episodes`.* ";
+		$query.= "FROM `seasons` ";
+		$query.= "LEFT JOIN `episodes` ON `episodes`.`seasons_id` = `seasons`.`id` ";
+		$query.= "WHERE `seasons`.`id` = ?";
+		$results = $this->preparedQuery( $query, "i", array($seasonId) );
 		return $results;
 	}
 
 //---- Functions pertaining to `episodes`------------------------------
-	function addEpisode($seasonsId, $episodeNo, $name, $airdate, $tvrageId, $tvdbId){
+	function addEpisode($seasonId, $episodeNo, $name, $airdate, $tvrageId, $tvdbId){
 		$query = "INSERT INTO `episodes` (`seasons_id`, `number`, `name`, `airdate`, `tvrageId`, `tvdbId`) ";
 		$query.= "VALUES (?, ?, ?, ?, ?, ?)";
-		$results = $this->preparedQuery( $query, "iissii", array($seasonsId, $episodeNo, $name, $airdate, $tvrageId, $tvdbId) );
+		$results = $this->preparedQuery( $query, "iissii", array($seasonId, $episodeNo, $name, $airdate, $tvrageId, $tvdbId) );
 		return $results;
 	}
 	function getEpisode($episodeId){
@@ -197,12 +227,12 @@ class Database{
 		$results = $this->preparedQuery( $query, "i", array($episodeId) );
 		return $results;
 	}
-	function updateEpisode($episodeId, $seasonsId, $episodeNo, $name, $airdate, $tvrageId, $tvdbId){
+	function updateEpisode($episodeId, $seasonId, $episodeNo, $name, $airdate, $tvrageId, $tvdbId){
 		$query = "UPDATE `episodes` ";
 		$query.= "SET `seasons_id` = ?, `number` = ?, `name` = ?, `airdate` = ?, `tvrageId` = ?, `tvdbId` = ? ";
 		$query.= "WHERE `id` = ?";
 		$results = $this->preparedQuery( $query, "iissiii", 
-					array($seasonsId, $episodeNo, $name, $airdate, $tvrageId, $tvdbId, $episodeId)
+					array($seasonId, $episodeNo, $name, $airdate, $tvrageId, $tvdbId, $episodeId)
 		);
 		return $results;
 	}
