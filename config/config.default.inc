@@ -15,4 +15,10 @@ $config["mysql"]["port"] = ;
 	* I use base64_encode( openssl_random_pseudo_bytes(64) );
 	*/
 	$config["site"]["salt"] = "";
+
+/**
+  * Enter Client ID and Client secret for Google+ OAuth2 API here
+  */
+$config["google_oauth2"]["id"] = "";
+$config["google_oauth2"]["secret"] = "";
 ?>
