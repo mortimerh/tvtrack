@@ -29,10 +29,11 @@ class Season{
    * Sets the value of id.
    *
    * @param mixed $id the id
-   * @return void
+   * @return self
    */
   public function setid($id) {
     $this->id = $id;
+    return $this;
   }
   /**
    * Gets the value of showId.
@@ -47,10 +48,11 @@ class Season{
    * Sets the value of showId.
    *
    * @param mixed $showId the showId
-   * @return void
+   * @return self
    */
   public function setshowId($showId) {
     $this->showId = $showId;
+    return $this;
   }
   /**
    * Gets the value of number.
@@ -65,15 +67,16 @@ class Season{
    * Sets the value of number.
    *
    * @param mixed $number the number
-   * @return void
+   * @return self
    */
   public function setnumber($number) {
     $this->number = $number;
+    return $this;
   }
   /**
    * Gets the value of name.
    *
-   * @return mixed
+   * @return string
    */
   public function getname() {
     return $this->name;
@@ -82,11 +85,12 @@ class Season{
   /**
    * Sets the value of name.
    *
-   * @param mixed $name the name
-   * @return void
+   * @param string $name the name
+   * @return self
    */
   public function setname($name) {
     $this->name = $name;
+    return $this;
   }
   /**
    * Gets the value of tvdbId.
@@ -101,10 +105,11 @@ class Season{
    * Sets the value of tvdbId.
    *
    * @param mixed $tvdbId the tvdbId
-   * @return void
+   * @return self
    */
   public function settvdbId($tvdbId) {
     $this->tvdbId = $tvdbId;
+    return $this;
   }
   /**
    * Gets the value of tvrageId.
@@ -119,10 +124,10 @@ class Season{
    * Sets the value of tvrageId.
    *
    * @param mixed $tvrageId the tvrageId
-   * @return void
+   * @return self
    */
   public function settvrageId($tvrageId) {
     $this->tvrageId = $tvrageId;
-  }
-}
+    return $this;
+  }}
 ?>

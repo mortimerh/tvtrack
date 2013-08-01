@@ -22,8 +22,7 @@ class Episode{
    * Gets the value of id.
    * @return int
    */
-  public function getId()
-  {
+  public function getId() {
       return $this->id;
   }
 
@@ -32,8 +31,7 @@ class Episode{
    * @param int $id the id
    * @return self
    */
-  public function setId($id)
-  {
+  public function setId($id) {
       $this->id = $id;
 
       return $this;
@@ -43,8 +41,7 @@ class Episode{
    * Gets the value of seasonId.
    * @return int
    */
-  public function getSeasonId()
-  {
+  public function getSeasonId() {
       return $this->seasonId;
   }
 
@@ -53,8 +50,7 @@ class Episode{
    * @param int $seasonId the seasonId
    * @return self
    */
-  public function setSeasonId($seasonId)
-  {
+  public function setSeasonId($seasonId) {
       $this->seasonId = $seasonId;
       return $this;
   }
@@ -63,8 +59,7 @@ class Episode{
    * Gets the value of number.
    * @return int
    */
-  public function getNumber()
-  {
+  public function getNumber() {
       return $this->number;
   }
 
@@ -73,8 +68,7 @@ class Episode{
    * @param int $number the number
    * @return self
    */
-  public function setNumber($number)
-  {
+  public function setNumber($number) {
       $this->number = $number;
       return $this;
   }
@@ -83,8 +77,7 @@ class Episode{
    * Gets the value of name.
    * @return string
    */
-  public function getName()
-  {
+  public function getName() {
       return $this->name;
   }
 
@@ -93,8 +86,7 @@ class Episode{
    * @param string $name the name
    * @return self
    */
-  public function setName($name)
-  {
+  public function setName($name) {
       $this->name = $name;
       return $this;
   }
@@ -103,8 +95,7 @@ class Episode{
    * Gets the value of airdate (YYYY-MM-DD).
    * @return string
    */
-  public function getAirdate()
-  {
+  public function getAirdate() {
       return $this->airdate;
   }
 
@@ -113,8 +104,7 @@ class Episode{
    * @param string $airdate the airdate
    * @return self
    */
-  public function setAirdate($airdate)
-  {
+  public function setAirdate($airdate) {
       $this->airdate = $airdate;
       return $this;
   }
@@ -123,8 +113,7 @@ class Episode{
    * Gets the value of tvdbId.
    * @return int
    */
-  public function getTvdbId()
-  {
+  public function getTvdbId() {
       return $this->tvdbId;
   }
 
@@ -133,8 +122,7 @@ class Episode{
    * @param int $tvdbId the tvdbId
    * @return self
    */
-  public function setTvdbId($tvdbId)
-  {
+  public function setTvdbId($tvdbId) {
       $this->tvdbId = $tvdbId;
       return $this;
   }
@@ -143,8 +131,7 @@ class Episode{
    * Gets the value of tvrageId.
    * @return int
    */
-  public function getTvrageId()
-  {
+  public function getTvrageId() {
       return $this->tvrageId;
   }
 
@@ -153,8 +140,7 @@ class Episode{
    * @param int $tvrageId the tvrageId
    * @return self
    */
-  public function setTvrageId($tvrageId)
-  {
+  public function setTvrageId($tvrageId) {
       $this->tvrageId = $tvrageId;
       return $this;
   }
